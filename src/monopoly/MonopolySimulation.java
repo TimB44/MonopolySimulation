@@ -28,7 +28,7 @@ public class MonopolySimulation {
     private final int[] freq;
 
     //Board objects used to keep track of the logic of some spaces
-     private final CommunityChestBoardObject communityChestBoardObject;
+    private final CommunityChestBoardObject communityChestBoardObject;
     private final ChanceBoardObject chanceBoardObject;
     private final JailBoardObject jailBoardObject;
     private final GoToJailBoardObject goToJailBoardObject;
@@ -90,8 +90,6 @@ public class MonopolySimulation {
 
         //Running first 1,000 turns
         while(turns < 1_000){
-            if(turns == 76)
-                System.out.println();
             d1 = rollDie();
             d2 = rollDie();
 
@@ -139,15 +137,12 @@ public class MonopolySimulation {
 
         //Running until 10,000 turns
         while(turns < 10_000){
-            if(turns == 76)
-                System.out.println();
             d1 = rollDie();
             d2 = rollDie();
 
             //if in jail do not move forward
             if(jailBoardObject.isInJail()){
-                if(position != 10)
-                    System.out.println("NOT 10");
+
                 //Doubles do not count in jail
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
@@ -190,15 +185,12 @@ public class MonopolySimulation {
 
         //Running until 100,000 turns
         while(turns < 100_000){
-            if(turns == 76)
-                System.out.println();
             d1 = rollDie();
             d2 = rollDie();
 
             //if in jail do not move forward
             if(jailBoardObject.isInJail()){
-                if(position != 10)
-                    System.out.println("NOT 10");
+
                 //Doubles do not count in jail
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
@@ -242,15 +234,13 @@ public class MonopolySimulation {
 
         //Running until 1_000,000 turns
         while(turns < 1_000_000){
-            if(turns == 76)
-                System.out.println();
+
             d1 = rollDie();
             d2 = rollDie();
 
             //if in jail do not move forward
             if(jailBoardObject.isInJail()){
-                if(position != 10)
-                    System.out.println("NOT 10");
+
                 //Doubles do not count in jail
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);

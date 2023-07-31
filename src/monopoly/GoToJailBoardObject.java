@@ -8,7 +8,14 @@ package monopoly;
  * @version 8/29/23
  */
 public class GoToJailBoardObject implements BoardObjects{
+
+    //used to send the player to jail
     private JailBoardObject jailBoardObject;
+
+    /**
+     * This method build the GoToJailBoardObject
+     * @param jailBoardObject - The Jail object for the monopoly simulation
+     */
     public GoToJailBoardObject(JailBoardObject jailBoardObject) {
         this.jailBoardObject = jailBoardObject;
     }
