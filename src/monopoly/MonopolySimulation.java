@@ -99,6 +99,7 @@ public class MonopolySimulation {
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -114,6 +115,7 @@ public class MonopolySimulation {
                 jailBoardObject.sentToJail();
                 doublesInARow = 0;
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -147,6 +149,7 @@ public class MonopolySimulation {
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -162,6 +165,7 @@ public class MonopolySimulation {
                 jailBoardObject.sentToJail();
                 doublesInARow = 0;
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -195,6 +199,7 @@ public class MonopolySimulation {
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -210,6 +215,7 @@ public class MonopolySimulation {
                 jailBoardObject.sentToJail();
                 doublesInARow = 0;
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -245,6 +251,7 @@ public class MonopolySimulation {
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -260,6 +267,7 @@ public class MonopolySimulation {
                 jailBoardObject.sentToJail();
                 doublesInARow = 0;
                 freq[position]++;
+                turns++;
                 continue;
             }
 
@@ -307,7 +315,7 @@ public class MonopolySimulation {
 
         //Sleeping for 5 seconds so that I can process the data before the simulation continues.
         try {
-            Thread.sleep(5000);
+            Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

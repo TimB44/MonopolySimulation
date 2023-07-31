@@ -1,0 +1,149 @@
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Monopoly Simulation\n\nThis repository contains a simple Java implementation of a Monopoly simulation. The simulation helps determine the most probable places for a player to land on during the game. It does not involve tracking money but only focuses on the player's position on the board.\n\n## How to Run\n\n1. Download the executable JAR file from the \"artifacts\" folder.\n\n2. Open a command-line interface (e.g., Terminal on macOS/Linux or Command Prompt on Windows).\n\n3. Navigate to the directory containing the downloaded JAR file.\n\n4. Execute the JAR file using the following command:\n`java -jar monopoly-simulation.jar <strategy> <number_of_simulations>`\n\nReplace <strategy> with one of the following options:\n\n* \"a\": Player pays $50 to get out of jail.\n* \"b\": Player attempts to roll doubles to get out of jail.\n* \"both\": Simulate both strategies.\n\nReplace <number_of_simulations> with an integer value specifying how many times you want to simulate the game for the selected strategy.\n\nThe results will be printed to the console.\n\nNote\nThis is a basic implementation for educational purposes and may not cover all aspects of the Monopoly game. Feel free to modify and expand the code according to your needs.\n\nEnjoy the simulation!\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 9f8103d972293babcef5afdfcd4e4c5725fce855)
++++ b/README.md	(date 1690777904039)
+@@ -21,7 +21,7 @@
+ 
+ Replace <number_of_simulations> with an integer value specifying how many times you want to simulate the game for the selected strategy.
+ 
+-The results will be printed to the console.
++The results will be printed to the console and automatically copied to clipboard.
+ 
+ Note
+ This is a basic implementation for educational purposes and may not cover all aspects of the Monopoly game. Feel free to modify and expand the code according to your needs.
+Index: src/monopoly/MonopolySimulation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package monopoly;\n\nimport java.awt.*;\nimport java.awt.datatransfer.Clipboard;\nimport java.awt.datatransfer.StringSelection;\nimport java.awt.datatransfer.Transferable;\nimport java.text.NumberFormat;\nimport java.util.HashMap;\nimport java.util.Random;\n\n/**\n * This class acts as a simulation of monopoly in order to find which places are the most probable for a player to land\n * on. This simulation does not keep track of money, and only has one player, however it does keep track of all aspects\n * of the game that affect your position on the board.\n *\n * @author Timothy Blamires\n * @version 8/30/23\n */\npublic class MonopolySimulation {\n\n    //Defines which strategy you use to get out of jail\n    private final boolean strategy;\n\n    //used as the dice of the game\n    private final Random rng;\n\n    //used to keep track of which spots are landed on most frequently\n    private final int[] freq;\n\n    //Board objects used to keep track of the logic of some spaces\n    private final CommunityChestBoardObject communityChestBoardObject;\n    private final ChanceBoardObject chanceBoardObject;\n    private final JailBoardObject jailBoardObject;\n    private final GoToJailBoardObject goToJailBoardObject;\n\n    //Hashmap to map board position to Board Objects\n    private final HashMap<Integer, BoardObjects> boardSpaces;\n\n    /**\n     * This method builds a MonopolySimulation object. The boolean parameter will determine which strategy is used to\n     * get out of jail. Note that both strategies will use a get out of free card instantly if the player has one.\n     * False - This means the player will use strategy \"a\", meaning they will immediately pay the 50$ to get out of jail\n     * True - This means the player will use strategy \"b\", meaning they will attempt to roll doubles to get out of jail\n     * @param strategy - The strategy used to get out of jail\n     */\n    public MonopolySimulation(boolean strategy) {\n        this.strategy = strategy;\n\n        //used as dice\n        rng = new Random();\n\n        //used to keep track places the player landed\n        freq = new int[40];\n        \n        //Creating BoardObjects\n        communityChestBoardObject = new CommunityChestBoardObject();\n        chanceBoardObject = new ChanceBoardObject();\n        jailBoardObject = new JailBoardObject(strategy, chanceBoardObject, communityChestBoardObject);\n        goToJailBoardObject = new GoToJailBoardObject(jailBoardObject);\n        communityChestBoardObject.setJail(jailBoardObject);\n        chanceBoardObject.setJail(jailBoardObject);\n        \n        //mapping board spaces to BoardObjects\n        boardSpaces = new HashMap<>(8);\n        boardSpaces.put(2, communityChestBoardObject);\n        boardSpaces.put(7, chanceBoardObject);\n        boardSpaces.put(10, jailBoardObject);\n        boardSpaces.put(17, communityChestBoardObject);\n        boardSpaces.put(22, chanceBoardObject);\n        boardSpaces.put(30, goToJailBoardObject);\n        boardSpaces.put(33, communityChestBoardObject);\n        boardSpaces.put(36, chanceBoardObject);\n    }\n\n    /**\n     * This method starts the simulation. The results will be recorded at 4 intervals during the simulation.\n     * 1,000 , 10,000 , 100,000 and 1,000,000. These results will be printed to the console and also copied to you\n     * clipboard. This method will keep track of some game logic, such as the 3 doubles rule.\n     */\n    public void run() {\n\n        //Variables used to track the player\n        int doublesInARow = 0;\n        int turns = 0;\n        int position = 0;\n\n        //variable for the dice\n        int d1;\n        int d2;\n\n        //Running first 1,000 turns\n        while(turns < 1_000){\n            d1 = rollDie();\n            d2 = rollDie();\n\n            //if in jail do not move forward\n            if(jailBoardObject.isInJail()){\n                //Doubles do not count in jail\n                doublesInARow = 0;\n                position = jailBoardObject.move(d1, d2, position);\n                freq[position]++;\n                continue;\n            }\n\n            //Seeing if doubles where rolled\n            if(d1 == d2)\n                doublesInARow++;\n            else\n                doublesInARow = 0;\n\n            //3 doubles in a row sends you to jail\n            if(doublesInARow == 3){\n                position = 10;\n                jailBoardObject.sentToJail();\n                doublesInARow = 0;\n                freq[position]++;\n                continue;\n            }\n\n            //move the player forward on the board (wrap around after 40)\n            position = (position + d1 + d2) % 40;\n\n            //If the player lands on an important place, call the move method on said BoardObject\n            if(boardSpaces.containsKey(position)){\n                position = boardSpaces.get(position).move(d1, d2, position);\n            }\n\n\n            //Increase the frequency of the current position. Note that it is th position at the end of the turn, so\n            //if you where to land somewhere then be moved by a GameObject, your final spot will be the only spot counted\n            freq[position]++;\n\n            //Increase teh counting variable\n            turns++;\n        }\n        printResults(turns);\n\n        //Running until 10,000 turns\n        while(turns < 10_000){\n            d1 = rollDie();\n            d2 = rollDie();\n\n            //if in jail do not move forward\n            if(jailBoardObject.isInJail()){\n\n                //Doubles do not count in jail\n                doublesInARow = 0;\n                position = jailBoardObject.move(d1, d2, position);\n                freq[position]++;\n                continue;\n            }\n\n            //Seeing if doubles where rolled\n            if(d1 == d2)\n                doublesInARow++;\n            else\n                doublesInARow = 0;\n\n            //3 doubles in a row sends you to jail\n            if(doublesInARow == 3){\n                position = 10;\n                jailBoardObject.sentToJail();\n                doublesInARow = 0;\n                freq[position]++;\n                continue;\n            }\n\n            //move the player forward on the board (wrap around after 40)\n            position = (position + d1 + d2) % 40;\n\n            //If the player lands on an important place, call the move method on said BoardObject\n            if(boardSpaces.containsKey(position)){\n                position = boardSpaces.get(position).move(d1, d2, position);\n            }\n\n\n            //Increase the frequency of the current position. Note that it is th position at the end of the turn, so\n            //if you where to land somewhere then be moved by a GameObject, your final spot will be the only spot counted\n            freq[position]++;\n\n            //Increase teh counting variable\n            turns++;\n        }\n        printResults(turns);\n\n        //Running until 100,000 turns\n        while(turns < 100_000){\n            d1 = rollDie();\n            d2 = rollDie();\n\n            //if in jail do not move forward\n            if(jailBoardObject.isInJail()){\n\n                //Doubles do not count in jail\n                doublesInARow = 0;\n                position = jailBoardObject.move(d1, d2, position);\n                freq[position]++;\n                continue;\n            }\n\n            //Seeing if doubles where rolled\n            if(d1 == d2)\n                doublesInARow++;\n            else\n                doublesInARow = 0;\n\n            //3 doubles in a row sends you to jail\n            if(doublesInARow == 3){\n                position = 10;\n                jailBoardObject.sentToJail();\n                doublesInARow = 0;\n                freq[position]++;\n                continue;\n            }\n\n            //move the player forward on the board (wrap around after 40)\n            position = (position + d1 + d2) % 40;\n\n            //If the player lands on an important place, call the move method on said BoardObject\n            if(boardSpaces.containsKey(position)){\n                position = boardSpaces.get(position).move(d1, d2, position);\n            }\n\n\n            //Increase the frequency of the current position. Note that it is th position at the end of the turn, so\n            //if you where to land somewhere then be moved by a GameObject, your final spot will be the only spot counted\n            freq[position]++;\n\n            //Increase teh counting variable\n            turns++;\n        }\n        printResults(turns);\n\n\n        //Running until 1_000,000 turns\n        while(turns < 1_000_000){\n\n            d1 = rollDie();\n            d2 = rollDie();\n\n            //if in jail do not move forward\n            if(jailBoardObject.isInJail()){\n\n                //Doubles do not count in jail\n                doublesInARow = 0;\n                position = jailBoardObject.move(d1, d2, position);\n                freq[position]++;\n                continue;\n            }\n\n            //Seeing if doubles where rolled\n            if(d1 == d2)\n                doublesInARow++;\n            else\n                doublesInARow = 0;\n\n            //3 doubles in a row sends you to jail\n            if(doublesInARow == 3){\n                position = 10;\n                jailBoardObject.sentToJail();\n                doublesInARow = 0;\n                freq[position]++;\n                continue;\n            }\n\n            //move the player forward on the board (wrap around after 40)\n            position = (position + d1 + d2) % 40;\n\n            //If the player lands on an important place, call the move method on said BoardObject\n            if(boardSpaces.containsKey(position)){\n                position = boardSpaces.get(position).move(d1, d2, position);\n            }\n\n\n            //Increase the frequency of the current position. Note that it is th position at the end of the turn, so\n            //if you where to land somewhere then be moved by a GameObject, your final spot will be the only spot counted\n            freq[position]++;\n\n            //Increase teh counting variable\n            turns++;\n        }\n        printResults(turns);\n    }\n\n    /**\n     * This method prints the results of the simulation to the console so that they can be recorded. This is called\n     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point\n     */\n    private void printResults(int turns) {\n        //Adding all the frequencies together in one string seperated by lines breaks\n        StringBuilder sb = new StringBuilder();\n        for (int i :freq) {\n            sb.append(i).append(\"\\n\");\n        }\n        System.out.println(\"Strategy \" + (strategy? \"b\": \"a\") +\"\\nData for turns = \" + NumberFormat.getIntegerInstance().format(turns) + \":\\n\");\n\n        //Copies data to clipboard automatically and print to console(I did this so that it was easier to make the spreadsheets)\n        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();\n        Transferable transferable = new StringSelection(sb.toString());\n        clipboard.setContents(transferable, null);\n\n        //Printing the data to the console\n        System.out.println(sb);\n\n\n        //Sleeping for 5 seconds so that I can process the data before the simulation continues.\n        try {\n            Thread.sleep(5000);\n        } catch (InterruptedException e) {\n            throw new RuntimeException(e);\n        }\n\n\n    }\n\n    /**\n     * Returns a random number 1 - 6 inclusive. Acts as the dice for the game\n     * @return integer 1 - 6\n     */\n    private int rollDie(){\n        return rng.nextInt(1,7);\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/monopoly/MonopolySimulation.java b/src/monopoly/MonopolySimulation.java
+--- a/src/monopoly/MonopolySimulation.java	(revision 9f8103d972293babcef5afdfcd4e4c5725fce855)
++++ b/src/monopoly/MonopolySimulation.java	(date 1690777904047)
+@@ -284,7 +284,9 @@
+ 
+     /**
+      * This method prints the results of the simulation to the console so that they can be recorded. This is called
+-     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point
++     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point.
++     * Note that the results are printed in the order of the spaces on the board, meaning GO is first, then
++     * Mediterranean etc.
+      */
+     private void printResults(int turns) {
+         //Adding all the frequencies together in one string seperated by lines breaks
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"3e5b9805-0d06-4a41-9505-3b279eb55fb0\" name=\"Changes\" comment=\"\">\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/README.md\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/README.md\" afterDir=\"false\" />\n      <change beforePath=\"$PROJECT_DIR$/src/META-INF/MANIFEST.MF\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/META-INF/MANIFEST.MF\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"MarkdownSettingsMigration\">\n    <option name=\"stateVersion\" value=\"1\" />\n  </component>\n  <component name=\"ProjectId\" id=\"2TE67vqYnqRge92LmgpUBSJ23Lb\" />\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"RunOnceActivity.OpenProjectViewOnStart\": \"true\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"WebServerToolWindowFactoryState\": \"false\",\n    \"node.js.detected.package.eslint\": \"true\",\n    \"node.js.detected.package.tslint\": \"true\",\n    \"node.js.selected.package.eslint\": \"(autodetect)\",\n    \"node.js.selected.package.tslint\": \"(autodetect)\",\n    \"nodejs_package_manager_path\": \"npm\",\n    \"project.structure.last.edited\": \"Artifacts\",\n    \"project.structure.proportion\": \"0.0\",\n    \"project.structure.side.proportion\": \"0.0\",\n    \"settings.editor.selected.configurable\": \"advanced.settings\",\n    \"vue.rearranger.settings.migration\": \"true\"\n  }\n}]]></component>\n  <component name=\"RunManager\">\n    <configuration name=\"MonopolySimulationDriver\" type=\"Application\" factoryName=\"Application\" temporary=\"true\" nameIsGenerated=\"true\">\n      <option name=\"MAIN_CLASS_NAME\" value=\"monopoly.MonopolySimulationDriver\" />\n      <module name=\"untitled\" />\n      <extension name=\"coverage\">\n        <pattern>\n          <option name=\"PATTERN\" value=\"monopoly.*\" />\n          <option name=\"ENABLED\" value=\"true\" />\n        </pattern>\n      </extension>\n      <method v=\"2\">\n        <option name=\"Make\" enabled=\"true\" />\n      </method>\n    </configuration>\n    <recent_temporary>\n      <list>\n        <item itemvalue=\"Application.MonopolySimulationDriver\" />\n      </list>\n    </recent_temporary>\n  </component>\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"3e5b9805-0d06-4a41-9505-3b279eb55fb0\" name=\"Changes\" comment=\"\" />\n      <created>1690595730754</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1690595730754</updated>\n      <workItem from=\"1690595731952\" duration=\"2372000\" />\n      <workItem from=\"1690775822540\" duration=\"376000\" />\n    </task>\n    <servers />\n  </component>\n  <component name=\"TypeScriptGeneratedFilesManager\">\n    <option name=\"version\" value=\"3\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 9f8103d972293babcef5afdfcd4e4c5725fce855)
++++ b/.idea/workspace.xml	(date 1690777934151)
+@@ -1,13 +1,18 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
++  <component name="ArtifactsWorkspaceSettings">
++    <artifacts-to-build>
++      <artifact name="MonopolySimulation:jar" />
++    </artifacts-to-build>
++  </component>
+   <component name="AutoImportSettings">
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="3e5b9805-0d06-4a41-9505-3b279eb55fb0" name="Changes" comment="">
++    <list default="true" id="3e5b9805-0d06-4a41-9505-3b279eb55fb0" name="Changes" comment="Fixed issue with jar and README.md">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" beforeDir="false" afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/monopoly/MonopolySimulation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/monopoly/MonopolySimulation.java" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -26,23 +31,23 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent"><![CDATA[{
+-  "keyToString": {
+-    "RunOnceActivity.OpenProjectViewOnStart": "true",
+-    "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "WebServerToolWindowFactoryState": "false",
+-    "node.js.detected.package.eslint": "true",
+-    "node.js.detected.package.tslint": "true",
+-    "node.js.selected.package.eslint": "(autodetect)",
+-    "node.js.selected.package.tslint": "(autodetect)",
+-    "nodejs_package_manager_path": "npm",
+-    "project.structure.last.edited": "Artifacts",
+-    "project.structure.proportion": "0.0",
+-    "project.structure.side.proportion": "0.0",
+-    "settings.editor.selected.configurable": "advanced.settings",
+-    "vue.rearranger.settings.migration": "true"
++  <component name="PropertiesComponent">{
++  &quot;keyToString&quot;: {
++    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
++    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
++    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
++    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
++    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
++    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
++    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
++    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
++    &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
++    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
++    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
++    &quot;settings.editor.selected.configurable&quot;: &quot;advanced.settings&quot;,
++    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+   }
+-}]]></component>
++}</component>
+   <component name="RunManager">
+     <configuration name="MonopolySimulationDriver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+       <option name="MAIN_CLASS_NAME" value="monopoly.MonopolySimulationDriver" />
+@@ -72,11 +77,35 @@
+       <option name="presentableId" value="Default" />
+       <updated>1690595730754</updated>
+       <workItem from="1690595731952" duration="2372000" />
+-      <workItem from="1690775822540" duration="376000" />
++      <workItem from="1690775822540" duration="1055000" />
++      <workItem from="1690777612651" duration="321000" />
++    </task>
++    <task id="LOCAL-00001" summary="Fixed issue with jar and README.md">
++      <created>1690776267822</created>
++      <option name="number" value="00001" />
++      <option name="presentableId" value="LOCAL-00001" />
++      <option name="project" value="LOCAL" />
++      <updated>1690776267822</updated>
+     </task>
++    <option name="localTasksCounter" value="2" />
+     <servers />
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+     <option name="version" value="3" />
+   </component>
++  <component name="Vcs.Log.Tabs.Properties">
++    <option name="TAB_STATES">
++      <map>
++        <entry key="MAIN">
++          <value>
++            <State />
++          </value>
++        </entry>
++      </map>
++    </option>
++  </component>
++  <component name="VcsManagerConfiguration">
++    <MESSAGE value="Fixed issue with jar and README.md" />
++    <option name="LAST_COMMIT_MESSAGE" value="Fixed issue with jar and README.md" />
++  </component>
+ </project>
+\ No newline at end of file
