@@ -284,7 +284,9 @@ public class MonopolySimulation {
 
     /**
      * This method prints the results of the simulation to the console so that they can be recorded. This is called
-     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point
+     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point.
+     * Note that the results are printed in the order of the spaces on the board, meaning GO is first, then
+     * Mediterranean etc.
      */
     private void printResults(int turns) {
         //Adding all the frequencies together in one string seperated by lines breaks

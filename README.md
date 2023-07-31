@@ -21,7 +21,7 @@ Replace strategy with one of the following options:
 
 Replace number_of_simulations with an integer value specifying how many times you want to simulate the game for the selected strategy.
 
-The results will be printed to the console.
+The results will be printed to the console and automatically copied to clipboard.
 
 Note
 This is a basic implementation for educational purposes and may not cover all aspects of the Monopoly game. Feel free to modify and expand the code according to your needs.
