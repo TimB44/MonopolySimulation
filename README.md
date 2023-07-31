@@ -11,15 +11,15 @@ This repository contains a simple Java implementation of a Monopoly simulation. 
 3. Navigate to the directory containing the downloaded JAR file.
 
 4. Execute the JAR file using the following command:
-`java -jar monopoly-simulation.jar <strategy> <number_of_simulations>`
+`java -jar monopolySimulation.jar <strategy> <number_of_simulations>`
 
-Replace <strategy> with one of the following options:
+Replace strategy with one of the following options:
 
 * "a": Player pays $50 to get out of jail.
 * "b": Player attempts to roll doubles to get out of jail.
 * "both": Simulate both strategies.
 
-Replace <number_of_simulations> with an integer value specifying how many times you want to simulate the game for the selected strategy.
+Replace number_of_simulations with an integer value specifying how many times you want to simulate the game for the selected strategy.
 
 The results will be printed to the console.
 
