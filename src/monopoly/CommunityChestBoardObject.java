@@ -3,23 +3,41 @@ package monopoly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+
+/**
+ * This Class represents the Community chest cards in the game of monopoly. Cards will be used then placed in a discard pile
+ * just like the real game. Once the cards run out, the discard pile is shuffled and the cards are placed back into the
+ * deck array. Note that because this simulation is only concerned with the position of the player, any cards that do
+ * not affect a players position will simply do nothing
+ *
+ * @author timothyblamires
+ * @version 8/30/23
+ */
 
 public class CommunityChestBoardObject implements BoardObjects {
 
     //Array used to keep track of the cards in the deck
-    //-1 indicates the card has no effect on the position soo it is not relevant for this simulation
-    List<Integer> deck;
+    private List<Integer> deck;
 
     //This is the list cards get added to once they have been used
-    List<Integer> discard;
+    private List<Integer> discard;
 
     //boolean to keep track if the player has the get out of jail free card
-    boolean hasGetOutOfJailCard;
+    private boolean hasGetOutOfJailCard;
 
     //Reference used to send the player to jail
     private JailBoardObject jailBoardObject;
 
+    /**
+     * This method Builds a communityChestBoardObject for the monopoly simulation. This method will build the deck array
+     * and populate it with the correct integers. These integers represent cards in the deck. It will also shuffle
+     * the deck.
+     *  0 means move to GO
+     * -1 means the card has no effect on the plays position
+     * -2 is the get out of jail free card
+     * -3 is the go-to jail card
+     *
+     */
     public CommunityChestBoardObject() {
         deck = new ArrayList<>(16);
         discard = new ArrayList<>(16);
@@ -65,7 +83,7 @@ public class CommunityChestBoardObject implements BoardObjects {
         //Remove the last item in the deck
         int card = deck.remove(deck.size() -1);
 
-        //The Get out of free card goes into the discard pile once used
+        //All cards go to the discard pile immediately except the get out of jail free card
         if(card != -2)
             discard.add(card);
 
@@ -87,7 +105,6 @@ public class CommunityChestBoardObject implements BoardObjects {
             return 10;
         }
 
-
         //Should never reach this line, If it does, it indicates an error
         throw new IllegalStateException("Invalid Card number in the community chest deck");
     }
@@ -101,7 +118,8 @@ public class CommunityChestBoardObject implements BoardObjects {
     }
 
     /**
-     * This method is called when a player uses their get out of jail free card that they got from a chance card
+     * This method is called when a player uses their get out of jail free card that they got from a chance card.
+     * An error will be thrown if the player does not have the card
      */
     public void useGetOutOfJailCard() {
         if(!hasGetOutOfJailCard)

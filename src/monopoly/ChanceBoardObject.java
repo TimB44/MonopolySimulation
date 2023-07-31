@@ -3,25 +3,42 @@ package monopoly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+
+/**
+ * This Class represents the Chance cards in the game of monopoly. Cards will be used then placed in a discard pile
+ * just like the real game. Once the cards run out, the discard pile is shuffled and the cards are placed back into the
+ * deck array. Note that because this simulation is only concerned with the position of the player, any cards that do
+ * not affect a players position will simply do nothing
+ *
+ * @author Timothy Blamires
+ * @version 8/30/23
+ */
 
 public class ChanceBoardObject implements BoardObjects {
 
     //This list keeps track chance cards in the deck
-
-    //A -1 indicates the card has no effect on position, a non-negative integer means the player travels to said position,
-    //negative integers < -1are used for special effect like going to jail, move backwards, and move to next RR/Utility
-    List<Integer> deck;
+    private List<Integer> deck;
 
     //This is the list cards get added to once they have been used
-    List<Integer> discard;
+    private List<Integer> discard;
 
     //boolean to keep track if the player has the get out of jail free card
-    boolean hasGetOutOfJailCard;
+    private boolean hasGetOutOfJailCard;
 
-    //Reference used to send the player to jail
+    //Reference used to send the player to jail if the go-to jail card is drawn
     private JailBoardObject jailBoardObject;
 
+    /**
+     * This method Builds a ChanceBoardObject for the monopoly simulation. This method will build the deck array and
+     * populate it with the correct  integers. These integers represent cards in the deck. It will also shuffle the deck.
+     *  a number >= 0 has the effect of moving the player to that position on the board.
+     * -1 means the card  does nothing
+     * -2 is the get out of jail free card
+     * -3 is the go-to jail card
+     * -4 is the move 3 spaces backwards card
+     * -5 is the advance to nearest railroad card (There are 2 of these in the deck)
+     * -6 is the advance to the nearest utility card
+     */
     public ChanceBoardObject() {
         deck = new ArrayList<>(16);
         discard = new ArrayList<>(16);
@@ -73,11 +90,11 @@ public class ChanceBoardObject implements BoardObjects {
         //Remove the last item in the deck
         int card = deck.remove(deck.size() -1);
 
-        //The Get out of free card goes into the discard pile once used
+        //All cards go to the discard pile immediately except the get out of jail free card
         if(card != -2)
             discard.add(card);
 
-        //A -1 card does not affect the position of the player, so the player does not move
+        // -1 cards does not affect the position of the player, so the player does not move
         if(card == -1) return position;
 
         //A card number >= 0 indicates means that we move are player to that position on the board
@@ -95,10 +112,10 @@ public class ChanceBoardObject implements BoardObjects {
             return 10;
         }
 
-        // -4 is the go back 3 spaces card
+        // -4 is the go back 3 spaces card (same as moving forward 37 spaces)
         if(card == -4) return (position + 37) % 40;
 
-        // -5 is the move to nearest railroad card
+        // -5 is the move to next railroad card
         if(card == -5){
             if(position >= 35 || position < 5)
                 return 5;
@@ -106,11 +123,10 @@ public class ChanceBoardObject implements BoardObjects {
                 return 35;
             if(position >= 15)
                 return 25;
-            if(position >= 5)
-                return 15;
+            return 15;
         }
 
-        //-5 is the move to nearest Utility card
+        //-6 is the move to nearest Utility card
         if(card == -6){
             if(position >= 28 || position < 12)
                 return 12;
@@ -130,7 +146,8 @@ public class ChanceBoardObject implements BoardObjects {
     }
 
     /**
-     * This method is called when a player uses their get out of jail free card that they got from a chance card
+     * This method is called when a player uses their get out of jail free card that they got from a chance card.
+     * An error will be thrown if the player does not have the card
      */
     public void useGetOutOfJailCard() {
         if(!hasGetOutOfJailCard)

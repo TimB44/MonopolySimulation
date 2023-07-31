@@ -1,17 +1,20 @@
 package monopoly;
 
-import javax.swing.text.Position;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Random;
 
 /**
  * This class acts as a simulation of monopoly in order to find which places are the most probable for a player to land
  * on. This simulation does not keep track of money, and only has one player, however it does keep track of all aspects
- * of the game that affect your position on the board
+ * of the game that affect your position on the board.
+ *
+ * @author Timothy Blamires
+ * @version 8/30/23
  */
 public class MonopolySimulation {
 
@@ -23,7 +26,7 @@ public class MonopolySimulation {
 
     //used to keep track of which spots are landed on most frequently
     private final int[] freq;
-    
+
     //Board objects used to keep track of the logic of some spaces
      private final CommunityChestBoardObject communityChestBoardObject;
     private final ChanceBoardObject chanceBoardObject;
@@ -36,10 +39,9 @@ public class MonopolySimulation {
     /**
      * This method builds a MonopolySimulation object. The boolean parameter will determine which strategy is used to
      * get out of jail. Note that both strategies will use a get out of free card instantly if the player has one.
-     *
      * False - This means the player will use strategy "a", meaning they will immediately pay the 50$ to get out of jail
      * True - This means the player will use strategy "b", meaning they will attempt to roll doubles to get out of jail
-     * @param strategy - The method used to get out of jail
+     * @param strategy - The strategy used to get out of jail
      */
     public MonopolySimulation(boolean strategy) {
         this.strategy = strategy;
@@ -58,7 +60,7 @@ public class MonopolySimulation {
         communityChestBoardObject.setJail(jailBoardObject);
         chanceBoardObject.setJail(jailBoardObject);
         
-        //Creating the map and filling it with the correct spaces
+        //mapping board spaces to BoardObjects
         boardSpaces = new HashMap<>(8);
         boardSpaces.put(2, communityChestBoardObject);
         boardSpaces.put(7, chanceBoardObject);
@@ -71,7 +73,9 @@ public class MonopolySimulation {
     }
 
     /**
-     * This method starts the simulation
+     * This method starts the simulation. The results will be recorded at 4 intervals during the simulation.
+     * 1,000 , 10,000 , 100,000 and 1,000,000. These results will be printed to the console and also copied to you
+     * clipboard. This method will keep track of some game logic, such as the 3 doubles rule.
      */
     public void run() {
 
@@ -93,8 +97,6 @@ public class MonopolySimulation {
 
             //if in jail do not move forward
             if(jailBoardObject.isInJail()){
-                if(position != 10)
-                    System.out.println("NOT 10");
                 //Doubles do not count in jail
                 doublesInARow = 0;
                 position = jailBoardObject.move(d1, d2, position);
@@ -239,7 +241,7 @@ public class MonopolySimulation {
 
 
         //Running until 1_000,000 turns
-        while(turns < 100_000){
+        while(turns < 1_000_000){
             if(turns == 76)
                 System.out.println();
             d1 = rollDie();
@@ -292,15 +294,15 @@ public class MonopolySimulation {
 
     /**
      * This method prints the results of the simulation to the console so that they can be recorded. This is called
-     * multiple times during the simmulation at the 1,000, 10,000, 100,000 and finaly the 1,000,000 turns point
+     * multiple times during the simulation at the 1,000, 10,000, 100,000 and finally the 1,000,000 turns point
      */
     private void printResults(int turns) {
         //Adding all the frequencies together in one string seperated by lines breaks
         StringBuilder sb = new StringBuilder();
         for (int i :freq) {
-            sb.append(i + "\n");
+            sb.append(i).append("\n");
         }
-        System.out.println("Stragegy " + (strategy? "b": "a") +"\nData for turns = " + turns + ":\n");
+        System.out.println("Strategy " + (strategy? "b": "a") +"\nData for turns = " + NumberFormat.getIntegerInstance().format(turns) + ":\n");
 
         //Copies data to clipboard automatically and print to console(I did this so that it was easier to make the spreadsheets)
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
