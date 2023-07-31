@@ -1,23 +1,24 @@
-Monopoly Simulation
+# Monopoly Simulation
+
 This repository contains a simple Java implementation of a Monopoly simulation. The simulation helps determine the most probable places for a player to land on during the game. It does not involve tracking money but only focuses on the player's position on the board.
 
-How to Run
-Download the executable JAR file from the "artifacts" folder.
+## How to Run
 
-Open a command-line interface (e.g., Terminal on macOS/Linux or Command Prompt on Windows).
+1. Download the executable JAR file from the "artifacts" folder.
 
-Navigate to the directory containing the downloaded JAR file.
+2. Open a command-line interface (e.g., Terminal on macOS/Linux or Command Prompt on Windows).
 
-Execute the JAR file using the following command:
+3. Navigate to the directory containing the downloaded JAR file.
 
-php
-Copy code
-java -jar monopoly-simulation.jar <strategy> <number_of_simulations>
+4. Execute the JAR file using the following command:
+`java -jar monopoly-simulation.jar <strategy> <number_of_simulations>`
+
 Replace <strategy> with one of the following options:
 
-"a": Player pays $50 to get out of jail.
-"b": Player attempts to roll doubles to get out of jail.
-"both": Simulate both strategies.
+* "a": Player pays $50 to get out of jail.
+* "b": Player attempts to roll doubles to get out of jail.
+* "both": Simulate both strategies.
+
 Replace <number_of_simulations> with an integer value specifying how many times you want to simulate the game for the selected strategy.
 
 The results will be printed to the console.
